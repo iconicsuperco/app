@@ -35,7 +35,8 @@ export function ImportPage() {
           addToast(`Imported ${result.imported} song${result.imported === 1 ? '' : 's'}`, 'success')
         }
         if (result.failed > 0) {
-          addToast(`${result.failed} file(s) failed to import`, 'error')
+          const firstError = result.errors[0]?.error || 'Unknown error'
+          addToast(`${result.failed} file(s) failed to import: ${firstError}`, 'error')
         }
         if (result.imported > 0 && result.failed === 0) {
           // Head to the Songs page to see them
@@ -43,7 +44,8 @@ export function ImportPage() {
         }
       } catch (err) {
         console.error('Import failed', err)
-        addToast('Import failed', 'error')
+        const message = err instanceof Error ? err.message : String(err)
+        addToast(`Import failed: ${message || 'Unknown error'}`, 'error')
       } finally {
         setIsImporting(false)
       }
@@ -236,9 +238,14 @@ export function ImportPage() {
                 </div>
                 <ul className="max-h-32 overflow-y-auto px-3 pb-3 space-y-1">
                   {progress.errors.slice(0, 10).map((e, i) => (
-                    <li key={i} className="text-xs text-muse-text-muted flex items-center gap-1">
+                    <li key={i} className="text-xs flex items-start gap-1">
                       <X className="w-3 h-3 shrink-0" />
-                      <span className="truncate">{e.file}</span>
+                      <div className="min-w-0">
+                        <p className="text-muse-text-muted truncate" title={e.file}>{e.file}</p>
+                        <p className="text-muse-error break-words" title={e.error}>
+                          {e.error || 'Unknown error'}
+                        </p>
+                      </div>
                     </li>
                   ))}
                 </ul>

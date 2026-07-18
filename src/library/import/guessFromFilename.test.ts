@@ -9,6 +9,13 @@ describe('guessFromFilename', () => {
     })
   })
 
+  it('handles dash-separated names without throwing', () => {
+    expect(guessFromFilename('Let Me Love You - DJ Snake.mp3')).toEqual({
+      artist: 'Let Me Love You',
+      title: 'DJ Snake',
+    })
+  })
+
   it('parses "01. Artist - Title.ext"', () => {
     expect(guessFromFilename('03. Pink Floyd - Time.flac')).toEqual({
       trackNo: 3,
