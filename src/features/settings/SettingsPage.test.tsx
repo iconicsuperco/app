@@ -42,7 +42,7 @@ describe('SettingsPage', () => {
     expect(screen.getByRole('button', { name: 'Clear library' })).not.toBeNull()
   })
 
-  it('exports data and clears it only after confirmation', async () => {
+  it('exports data and clears it only after dialog confirmation', async () => {
     libraryActions.exportLibraryData.mockResolvedValue({ version: 1 })
     libraryActions.clearLibraryData.mockResolvedValue(undefined)
     vi.stubGlobal('URL', {
@@ -50,7 +50,6 @@ describe('SettingsPage', () => {
       revokeObjectURL: vi.fn(),
     })
     vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
-    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
 
     render(<SettingsPage />)
 
@@ -58,11 +57,11 @@ describe('SettingsPage', () => {
     await waitFor(() => expect(libraryActions.exportLibraryData).toHaveBeenCalledOnce())
 
     fireEvent.click(screen.getByRole('button', { name: 'Clear library' }))
+    expect(screen.getByRole('dialog')).not.toBeNull()
     expect(libraryActions.clearLibraryData).not.toHaveBeenCalled()
 
-    confirm.mockReturnValue(true)
-    fireEvent.click(screen.getByRole('button', { name: 'Clear library' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Clear library permanently' }))
     await waitFor(() => expect(libraryActions.clearLibraryData).toHaveBeenCalledOnce())
-    expect(window.confirm).toHaveBeenCalledTimes(2)
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 })

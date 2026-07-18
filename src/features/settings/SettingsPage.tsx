@@ -1,4 +1,6 @@
 import { Download, Trash2 } from 'lucide-react'
+import * as Dialog from '@radix-ui/react-dialog'
+import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
 import { clearLibraryData, exportLibraryData } from '@/library/libraryData'
 import { useSettingsStore } from '@/store/settingsStore'
@@ -13,6 +15,8 @@ const THEMES = [
 const ACCENT_COLORS = ['#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e', '#f59e0b']
 
 export function SettingsPage() {
+  const [clearDialogOpen, setClearDialogOpen] = useState(false)
+  const [isClearing, setIsClearing] = useState(false)
   const crossfadeEnabled = useSettingsStore((s) => s.crossfadeEnabled)
   const gaplessEnabled = useSettingsStore((s) => s.gaplessEnabled)
   const eqEnabled = useSettingsStore((s) => s.eqEnabled)
@@ -42,17 +46,17 @@ export function SettingsPage() {
     }
   }
 
-  const handleClear = async () => {
-    if (!window.confirm('Clear your entire library? This permanently removes all music, playlists, and history.')) {
-      return
-    }
-
+  const handleConfirmClear = async () => {
+    setIsClearing(true)
     try {
       await clearLibraryData()
+      setClearDialogOpen(false)
       addToast('Library cleared', 'success')
     } catch (error) {
       console.error('Library clear failed', error)
       addToast('Could not clear library', 'error')
+    } finally {
+      setIsClearing(false)
     }
   }
 
@@ -119,14 +123,60 @@ export function SettingsPage() {
             </Button>
           </SettingRow>
           <SettingRow label="Clear Library" description="Remove all music and data">
-            <Button variant="secondary" size="sm" onClick={() => void handleClear()} className="gap-2 text-muse-error">
+            <Button variant="secondary" size="sm" onClick={() => setClearDialogOpen(true)} className="gap-2 text-muse-error">
               <Trash2 className="w-4 h-4" />
               Clear library
             </Button>
           </SettingRow>
         </SettingSection>
       </div>
+      <ClearLibraryDialog
+        open={clearDialogOpen}
+        isClearing={isClearing}
+        onOpenChange={setClearDialogOpen}
+        onConfirm={() => void handleConfirmClear()}
+      />
     </div>
+  )
+}
+
+function ClearLibraryDialog({
+  open,
+  isClearing,
+  onOpenChange,
+  onConfirm,
+}: {
+  open: boolean
+  isClearing: boolean
+  onOpenChange: (open: boolean) => void
+  onConfirm: () => void
+}) {
+  return (
+    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60" />
+        <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-xl border border-muse-glass-border bg-muse-bg-surface p-6 shadow-xl">
+          <Dialog.Title className="text-lg font-semibold text-muse-text">Clear your library?</Dialog.Title>
+          <Dialog.Description className="mt-2 text-sm text-muse-text-muted">
+            This permanently removes all music, playlists, artwork, and listening history. This action cannot be undone.
+          </Dialog.Description>
+          <div className="mt-6 flex justify-end gap-3">
+            <Dialog.Close asChild>
+              <Button variant="secondary" size="sm" disabled={isClearing}>Cancel</Button>
+            </Dialog.Close>
+            <Button
+              variant="primary"
+              size="sm"
+              disabled={isClearing}
+              onClick={onConfirm}
+              className="bg-muse-error hover:bg-muse-error/80"
+            >
+              {isClearing ? 'Clearing…' : 'Clear library permanently'}
+            </Button>
+          </div>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   )
 }
 
