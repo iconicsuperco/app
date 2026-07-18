@@ -22,6 +22,7 @@ import type { Track } from '@/types'
 class PlayerControllerImpl {
   private currentObjectUrl: string | null = null
   private bound = false
+  private currentMediaSessionArtworkUrl: string | null = null
 
   /** Wire engine events to the stores. Idempotent — safe to call multiple times. */
   init(): void {
@@ -173,18 +174,9 @@ class PlayerControllerImpl {
       return
     }
 
+    // For 'off' and 'all', QueueStore.next() / PlayerController.next()
+    // decide whether to stop or continue.
     await this.next()
-
-    // If repeat is 'off' and we've hit the end, stop
-    const queue = useQueueStore.getState()
-    if (
-      repeatMode === 'off' &&
-      queue.currentIndex === 0 &&
-      queue.queue.length > 0
-    ) {
-      // Queue wrapped back to start — stop unless repeat-all
-      this.stop()
-    }
   }
 
   private stop(): void {
@@ -213,15 +205,26 @@ class PlayerControllerImpl {
   private async updateMediaSession(track: Track): Promise<void> {
     if (!('mediaSession' in navigator)) return
 
+    // Revoke previous artwork URL to avoid leaking object URLs
+    if (this.currentMediaSessionArtworkUrl) {
+      try {
+        URL.revokeObjectURL(this.currentMediaSessionArtworkUrl)
+      } catch {
+        // ignore
+      }
+      this.currentMediaSessionArtworkUrl = null
+    }
+
     // Best-effort: attach artwork if we have a stored blob
     let artwork: MediaImage[] = []
     if (track.artworkId) {
       try {
         const artBlob = await db.artworkBlobs.get(track.artworkId)
         if (artBlob) {
+          this.currentMediaSessionArtworkUrl = URL.createObjectURL(artBlob.blob)
           artwork = [
             {
-              src: URL.createObjectURL(artBlob.blob),
+              src: this.currentMediaSessionArtworkUrl,
               sizes: '512x512',
             },
           ]

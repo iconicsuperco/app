@@ -38,11 +38,11 @@ export const recentlyPlayedQuery = (limit = 50) =>
   })()
 
 export const favoriteTracksQuery = () =>
-  db.tracks
-    .where('isFavorite')
-    .equals(1 as never)
-    .toArray()
-    .then((tracks) => tracks.sort((a, b) => a.title.localeCompare(b.title)))
+  db.tracks.toArray().then((tracks) =>
+    tracks
+      .filter((t) => t.isFavorite)
+      .sort((a, b) => a.title.localeCompare(b.title)),
+  )
 
 // ─── Detail queries ───────────────────────────────────────────
 
@@ -63,8 +63,11 @@ export const artistByIdQuery = (id: string) =>
     const artist = await db.artists.get(id)
     if (!artist) return null
     const albums = await db.albums.where('id').anyOf(artist.albumIds).toArray()
-    const albumIds = new Set(albums.map((a) => a.id))
-    const tracks = await db.tracks.where('album').anyOf([...albumIds]).toArray()
+
+    // Track.album stores album title (not album id), so join via album titles.
+    const albumTitles = Array.from(new Set(albums.map((a) => a.title)))
+    const tracks = await db.tracks.where('album').anyOf(albumTitles).toArray()
+
     tracks.sort((a, b) => (b.playCount ?? 0) - (a.playCount ?? 0))
     return { artist, albums, tracks }
   })()
