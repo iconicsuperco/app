@@ -12,12 +12,14 @@ export function TrackList({
   className,
   header,
   estimatedRowHeight = 56,
+  onRemoveFromPlaylist,
 }: {
   tracks: Track[]
   onPlayTrack: (trackId: string) => void
   className?: string
   header?: ReactNode
   estimatedRowHeight?: number
+  onRemoveFromPlaylist?: (trackId: string) => void
 }) {
   const viewportRef = useRef<HTMLDivElement | null>(null)
 
@@ -34,7 +36,7 @@ export function TrackList({
     <div className={cn('h-full min-h-0', className)}>
       {header}
       <ScrollArea className="h-full" viewportRef={viewportRef}>
-        <div className="w-full relative">
+        <div className="relative w-full">
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,
@@ -56,7 +58,12 @@ export function TrackList({
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <TrackRow track={track} index={virtualRow.index} onPlay={() => onPlayTrack(track.id)} />
+                  <TrackRow
+                    track={track}
+                    index={virtualRow.index}
+                    onPlay={() => onPlayTrack(track.id)}
+                    onRemoveFromPlaylist={onRemoveFromPlaylist}
+                  />
                 </div>
               )
             })}
