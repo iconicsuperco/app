@@ -21,8 +21,8 @@ export function FavoritesPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="h-full min-h-0 flex flex-col p-6">
+      <div className="flex items-center justify-between mb-6 shrink-0">
         <div>
           <h1 className="text-2xl font-bold">Favorites</h1>
           <p className="text-sm text-muse-text-muted mt-0.5">
@@ -42,7 +42,7 @@ export function FavoritesPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-[2rem_4fr_3fr_1fr_3rem] gap-3 px-3 pb-2 text-xs text-muse-text-muted uppercase tracking-wider border-b border-muse-glass-border">
+      <div className="shrink-0 grid grid-cols-[2rem_4fr_3fr_1fr_3rem] gap-3 px-3 pb-2 text-xs text-muse-text-muted uppercase tracking-wider border-b border-muse-glass-border">
         <span className="text-center">#</span>
         <span>Title</span>
         <span>Album</span>
@@ -50,7 +50,7 @@ export function FavoritesPage() {
         <span />
       </div>
 
-      <div className="pt-1" style={{ height: 'calc(100vh - 260px)' }}>
+      <div className="flex-1 min-h-0 pt-1">
         <TrackList
           tracks={favorites}
           onPlayTrack={(trackId) => {

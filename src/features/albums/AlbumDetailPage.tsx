@@ -29,8 +29,8 @@ export function AlbumDetailPage() {
   }
 
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6 gap-4 flex-wrap">
+    <div className="h-full min-h-0 flex flex-col p-6">
+      <div className="shrink-0 flex items-center justify-between mb-6 gap-4 flex-wrap">
         <div className="flex items-center gap-4 min-w-0">
           <div className="w-20 h-20 rounded-xl bg-muse-bg-surface overflow-hidden shrink-0">
             <AlbumArtworkHero artworkId={data.album.artworkId} />
@@ -54,7 +54,7 @@ export function AlbumDetailPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-[2rem_4fr_3fr_1fr_3rem] gap-3 px-3 pb-2 text-xs text-muse-text-muted uppercase tracking-wider border-b border-muse-glass-border">
+      <div className="shrink-0 grid grid-cols-[2rem_4fr_3fr_1fr_3rem] gap-3 px-3 pb-2 text-xs text-muse-text-muted uppercase tracking-wider border-b border-muse-glass-border">
         <span className="text-center">#</span>
         <span>Title</span>
         <span>Album</span>
@@ -62,7 +62,7 @@ export function AlbumDetailPage() {
         <span />
       </div>
 
-      <div className="pt-1" style={{ height: 'calc(100vh - 280px)' }}>
+      <div className="flex-1 min-h-0 pt-1">
         <TrackList
           tracks={tracks as Track[]}
           onPlayTrack={(trackId) => void playerController.playFromQueue(trackIds, trackId)}

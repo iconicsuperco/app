@@ -4,12 +4,18 @@ import { describe, expect, it, vi } from 'vitest'
 import { TrackList } from './TrackList'
 import type { Track } from '@/types'
 
-vi.mock('@tanstack/react-virtual', () => ({
-  useVirtualizer: () => ({
-    getVirtualItems: () => [{ index: 0, start: 0 }],
-    getTotalSize: () => 56,
-  }),
+const virtualizerState = vi.hoisted(() => ({
+  items: [] as { index: number; start: number }[],
 }))
+
+vi.mock('@tanstack/react-virtual', () => {
+  const virtualizer = {
+    getVirtualItems: () => virtualizerState.items,
+    getTotalSize: () => virtualizerState.items.length * 56,
+  }
+
+  return { useVirtualizer: () => virtualizer }
+})
 
 const track: Track = {
   id: 'track-1',
@@ -26,8 +32,20 @@ const track: Track = {
 }
 
 describe('TrackList', () => {
-  it('fills its sized parent and renders virtualized track rows into the DOM', () => {
-    const { container } = render(
+  it('renders rows into the DOM after the virtualizer measures its viewport', () => {
+    virtualizerState.items = []
+    const { container, rerender } = render(
+      <MemoryRouter>
+        <div style={{ height: 300 }}>
+          <TrackList tracks={[track]} onPlayTrack={() => undefined} />
+        </div>
+      </MemoryRouter>,
+    )
+
+    expect(screen.queryByText(track.title)).toBeNull()
+
+    virtualizerState.items = [{ index: 0, start: 0 }]
+    rerender(
       <MemoryRouter>
         <div style={{ height: 300 }}>
           <TrackList tracks={[track]} onPlayTrack={() => undefined} />

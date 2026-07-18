@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useMemo, useRef } from 'react'
+import { useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import type { Track } from '@/types'
@@ -19,22 +19,22 @@ export function TrackList({
   header?: ReactNode
   estimatedRowHeight?: number
 }) {
-  const parentRef = useRef<HTMLDivElement | null>(null)
+  const viewportRef = useRef<HTMLDivElement | null>(null)
 
   const virtualizer = useVirtualizer({
-    getScrollElement: () => parentRef.current,
+    getScrollElement: () => viewportRef.current,
     count: tracks.length,
     estimateSize: () => estimatedRowHeight,
     overscan: 8,
   })
 
-  const items = useMemo(() => virtualizer.getVirtualItems(), [virtualizer])
+  const items = virtualizer.getVirtualItems()
 
   return (
-    <div className={cn('h-full', className)}>
+    <div className={cn('h-full min-h-0', className)}>
       {header}
-      <ScrollArea className="h-full">
-        <div ref={parentRef} className="h-full w-full relative">
+      <ScrollArea className="h-full" viewportRef={viewportRef}>
+        <div className="w-full relative">
           <div
             style={{
               height: `${virtualizer.getTotalSize()}px`,

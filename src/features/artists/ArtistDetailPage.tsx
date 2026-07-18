@@ -48,11 +48,10 @@ export function ArtistDetailPage() {
 
   const albums = (data as { albums?: Album[] } | null)?.albums ?? []
 
-  const tracks = useMemo(() => {
-    // artistByIdQuery currently only returns { artist, albums } (no top tracks).
-    // Avoid extra DB queries here until the query provides top tracks.
-    return [] as Track[]
-  }, [])
+  const tracks = useMemo(
+    () => (data as { tracks?: Track[] } | null)?.tracks ?? [],
+    [data],
+  )
 
 
   const trackIds = useMemo(() => tracks.map((t) => t.id), [tracks])
@@ -60,8 +59,8 @@ export function ArtistDetailPage() {
   if (!data) return <ArtistDetailLoading />
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
+    <div className="h-full min-h-0 flex flex-col p-6">
+      <div className="shrink-0 mb-6">
         <h1 className="text-2xl font-bold">{(data as { artist?: { name?: string } }).artist?.name ?? 'Artist'}</h1>
 
         <p className="text-sm text-muse-text-muted mt-0.5">
@@ -72,7 +71,7 @@ export function ArtistDetailPage() {
       {albums.length > 0 && (
         <>
           <h2 className="text-lg font-semibold mb-3">Albums</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
+          <div className="shrink-0 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 mb-8">
             {albums.map((album: Album) => (
               <AlbumCard
                 key={album.id}
@@ -84,7 +83,7 @@ export function ArtistDetailPage() {
         </>
       )}
 
-      <h2 className="text-lg font-semibold mb-3">Top Tracks</h2>
+      <h2 className="shrink-0 text-lg font-semibold mb-3">Top Tracks</h2>
       {tracks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center text-muse-text-muted">
           <Music2 className="w-12 h-12 mb-4" />
@@ -92,7 +91,7 @@ export function ArtistDetailPage() {
           <p className="text-muse-text-secondary text-sm">Top tracks will appear once available.</p>
         </div>
       ) : (
-        <div style={{ height: 'calc(100vh - 380px)' }}>
+        <div className="flex-1 min-h-0">
           <TrackList tracks={tracks} onPlayTrack={(trackId) => void playerController.playFromQueue(trackIds, trackId)} />
         </div>
       )}
