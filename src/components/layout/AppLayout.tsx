@@ -7,6 +7,7 @@ import { useUIStore } from '@/store/uiStore'
 import { ToastContainer } from '@/components/ui/ToastContainer'
 import { NowPlayingView } from '@/features/now-playing/NowPlayingView'
 import { QueuePanel } from '@/features/queue/QueuePanel'
+import { CommandPalette } from '@/features/command-palette/CommandPalette'
 
 export function AppLayout() {
   const { nowPlayingOpen, queueOpen } = useUIStore()
@@ -16,10 +17,10 @@ export function AppLayout() {
       <Sidebar />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <TopBar />
 
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden">
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
           <Outlet />
         </main>
 
@@ -35,7 +36,7 @@ export function AppLayout() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 40 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 bg-muse-bg"
+            className="bg-muse-bg fixed inset-0 z-40"
           >
             <NowPlayingView />
           </motion.div>
@@ -50,7 +51,7 @@ export function AppLayout() {
             animate={{ x: 0 }}
             exit={{ x: 320 }}
             transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed right-0 top-0 bottom-[var(--player-height)] w-80 z-30 glass border-l border-muse-glass-border"
+            className="glass border-muse-glass-border fixed top-0 right-0 bottom-[var(--player-height)] z-30 w-80 border-l"
           >
             <QueuePanel />
           </motion.div>
@@ -59,6 +60,7 @@ export function AppLayout() {
 
       {/* Toast notifications */}
       <ToastContainer />
+      <CommandPalette />
     </div>
   )
 }

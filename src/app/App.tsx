@@ -5,6 +5,7 @@ import { playerController } from '@/audio/PlayerController'
 import { audioEngine } from '@/audio/AudioEngine'
 import { usePlayerStore } from '@/player/PlayerStore'
 import { useSettingsStore } from '@/store/settingsStore'
+import { useUIStore } from '@/store/uiStore'
 
 export function App() {
   const accentColor = useSettingsStore((s) => s.accentColor)
@@ -40,6 +41,20 @@ export function App() {
     document.documentElement.dataset.theme = themePreset
     document.documentElement.style.setProperty('--color-accent', accentColor)
   }, [accentColor, themePreset])
+
+  useEffect(() => {
+    const handler = (event: KeyboardEvent) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault()
+        useUIStore
+          .getState()
+          .setCommandPaletteOpen(!useUIStore.getState().commandPaletteOpen)
+      }
+      if (event.key === 'Escape') useUIStore.getState().setCommandPaletteOpen(false)
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return <RouterProvider router={router} />
 }
