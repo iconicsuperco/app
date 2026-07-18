@@ -1,22 +1,94 @@
-import { Search as SearchIcon } from 'lucide-react'
-
+import { Search } from 'lucide-react'
+import { useLiveQuery } from 'dexie-react-hooks'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { allAlbumsQuery, allArtistsQuery, allTracksQuery } from '@/library/queries'
+import { playerController } from '@/audio/PlayerController'
+import { searchLibrary } from '@/library/search'
 export function SearchPage() {
+  const [q, setQ] = useState('')
+  const tracks = useLiveQuery(() => allTracksQuery(), []) ?? []
+  const albums = useLiveQuery(() => allAlbumsQuery(), []) ?? []
+  const artists = useLiveQuery(() => allArtistsQuery(), []) ?? []
+  const r = searchLibrary(q, tracks, albums, artists)
+  const nav = useNavigate()
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Search</h1>
-      <div className="max-w-xl mx-auto">
-        <div className="relative">
-          <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muse-text-muted" />
-          <input
-            type="text"
-            placeholder="What do you want to listen to?"
-            className="w-full h-12 pl-12 pr-4 rounded-full bg-muse-bg-surface border border-muse-glass-border text-muse-text placeholder-muse-text-muted text-sm focus:outline-none focus:ring-2 focus:ring-muse-accent focus:border-transparent transition-all"
-          />
+      <h1 className="mb-6 text-2xl font-bold">Search</h1>
+      <div className="relative mx-auto max-w-xl">
+        <Search className="text-muse-text-muted absolute top-4 left-4 h-5 w-5" />
+        <input
+          autoFocus
+          aria-label="Search library"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="What do you want to listen to?"
+          className="border-muse-glass-border bg-muse-bg-surface text-muse-text w-full rounded-full border py-3 pl-12"
+        />
+      </div>
+      {!q ? (
+        <p className="text-muse-text-muted py-20 text-center">
+          Search your library for songs, albums, and artists
+        </p>
+      ) : (
+        <div className="mx-auto mt-8 max-w-xl space-y-6">
+          {r.tracks.length + r.albums.length + r.artists.length === 0 ? (
+            <p className="text-muse-text-muted">No results found.</p>
+          ) : (
+            <>
+              {section(
+                'Songs',
+                r.tracks.slice(0, 5).map((t) => (
+                  <button
+                    key={t.id}
+                    onClick={() =>
+                      void playerController.playFromQueue(
+                        r.tracks.map((x) => x.id),
+                        t.id,
+                      )
+                    }
+                    className="text-muse-text block w-full text-left"
+                  >
+                    {t.title} — {t.artist}
+                  </button>
+                )),
+              )}
+              {section(
+                'Albums',
+                r.albums.slice(0, 5).map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => nav(`/album/${a.id}`)}
+                    className="text-muse-text block"
+                  >
+                    {a.title}
+                  </button>
+                )),
+              )}
+              {section(
+                'Artists',
+                r.artists.slice(0, 5).map((a) => (
+                  <button
+                    key={a.id}
+                    onClick={() => nav(`/artist/${a.id}`)}
+                    className="text-muse-text block"
+                  >
+                    {a.name}
+                  </button>
+                )),
+              )}
+            </>
+          )}
         </div>
-      </div>
-      <div className="flex flex-col items-center justify-center py-20 text-center text-muse-text-muted">
-        <p className="text-sm">Search your library for songs, albums, and artists</p>
-      </div>
+      )}
     </div>
   )
+}
+function section(name: string, items: React.ReactNode[]) {
+  return items.length ? (
+    <section>
+      <h2 className="text-muse-text-muted mb-2 text-sm font-semibold">{name}</h2>
+      <div className="space-y-2">{items}</div>
+    </section>
+  ) : null
 }

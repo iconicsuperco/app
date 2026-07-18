@@ -51,6 +51,22 @@ export function App() {
           .setCommandPaletteOpen(!useUIStore.getState().commandPaletteOpen)
       }
       if (event.key === 'Escape') useUIStore.getState().setCommandPaletteOpen(false)
+      const target = event.target as HTMLElement
+      if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') return
+      if (event.key === ' ') {
+        event.preventDefault()
+        void playerController.togglePlayPause()
+      }
+      if (event.key === 'ArrowLeft') playerController.seekBy(-10)
+      if (event.key === 'ArrowRight') playerController.seekBy(10)
+      if (event.key.toLowerCase() === 'n') void playerController.next()
+      if (event.key.toLowerCase() === 'p') void playerController.previous()
+      if (event.key.toLowerCase() === 's') usePlayerStore.getState().toggleShuffle()
+      if (event.key.toLowerCase() === 'r') usePlayerStore.getState().cycleRepeatMode()
+      if (event.key === '/') {
+        event.preventDefault()
+        document.querySelector<HTMLInputElement>('[aria-label="Search library"]')?.focus()
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
