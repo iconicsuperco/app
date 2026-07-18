@@ -42,6 +42,16 @@ export class MuseDB extends Dexie {
             : undefined
         })
       })
+
+    this.version(3).stores({
+      tracks: 'id, blobId, artistId, albumId, artist, album, albumArtist, genre, year, isFavorite, dateAdded, lastPlayed, duration',
+      albums: 'id, title, albumArtist, year',
+      artists: 'id, name',
+      playlists: 'id, name, createdAt',
+      playHistory: 'id, trackId, playedAt',
+      audioBlobs: 'id',
+      artworkBlobs: 'id',
+    })
   }
 }
 
