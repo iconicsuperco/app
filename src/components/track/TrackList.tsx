@@ -4,6 +4,7 @@ import { useVirtualizer } from '@tanstack/react-virtual'
 import { ScrollArea } from '@/components/ui/ScrollArea'
 import type { Track } from '@/types'
 import { TrackRow } from '@/components/track/TrackRow'
+import { cn } from '@/lib/utils'
 
 export function TrackList({
   tracks,
@@ -30,7 +31,7 @@ export function TrackList({
   const items = useMemo(() => virtualizer.getVirtualItems(), [virtualizer])
 
   return (
-    <div className={className}>
+    <div className={cn('h-full', className)}>
       {header}
       <ScrollArea className="h-full">
         <div ref={parentRef} className="h-full w-full relative">
@@ -65,4 +66,3 @@ export function TrackList({
     </div>
   )
 }
-

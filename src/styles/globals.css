@@ -60,6 +60,22 @@
   --duration-slow: 400ms;
 }
 
+:root[data-theme='midnight'] {
+  --color-bg: #070712;
+  --color-bg-elevated: #0d0d1d;
+  --color-bg-surface: #151528;
+  --color-bg-hover: #1d1d35;
+  --color-bg-active: #272744;
+}
+
+:root[data-theme='ocean'] {
+  --color-bg: #06171f;
+  --color-bg-elevated: #0a212c;
+  --color-bg-surface: #10303d;
+  --color-bg-hover: #173d4b;
+  --color-bg-active: #205160;
+}
+
 /* ─── Theme utilities ────────────────────────────────────────── */
 @theme inline {
   --color-muse-bg:            var(--color-bg);

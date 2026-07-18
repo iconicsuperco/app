@@ -7,6 +7,9 @@ import { usePlayerStore } from '@/player/PlayerStore'
 import { useSettingsStore } from '@/store/settingsStore'
 
 export function App() {
+  const accentColor = useSettingsStore((s) => s.accentColor)
+  const themePreset = useSettingsStore((s) => s.themePreset)
+
   // Wire the audio engine ↔ stores once on app boot
   useEffect(() => {
     playerController.init()
@@ -32,6 +35,11 @@ export function App() {
       unsubPlayer()
     }
   }, [])
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = themePreset
+    document.documentElement.style.setProperty('--color-accent', accentColor)
+  }, [accentColor, themePreset])
 
   return <RouterProvider router={router} />
 }
