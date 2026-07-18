@@ -99,6 +99,7 @@ export function TrackRow({
           e.stopPropagation()
           void toggleFavorite(track.id)
         }}
+        aria-label={track.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
         className={cn(
           'flex items-center justify-center transition-opacity',
           track.isFavorite

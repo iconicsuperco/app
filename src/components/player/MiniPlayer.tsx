@@ -202,6 +202,7 @@ export function MiniPlayer() {
               variant="ghost"
               size="icon-sm"
               onClick={toggleQueue}
+              aria-label="Open queue"
               className="text-muse-text-muted hover:text-muse-text"
             >
               <ListMusic className="w-4 h-4" />
@@ -233,6 +234,7 @@ export function MiniPlayer() {
               variant="ghost"
               size="icon-sm"
               onClick={() => setNowPlayingOpen(true)}
+              aria-label="Open now playing"
               className="text-muse-text-muted hover:text-muse-text"
             >
               <Maximize2 className="w-4 h-4" />
