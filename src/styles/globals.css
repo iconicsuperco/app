@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+/* ─── Design Tokens ────────────────────────────────────────────── */
+:root {
+  /* Background ramp */
+  --color-bg:          #0a0a0f;
+  --color-bg-elevated:  #111118;
+  --color-bg-surface:   #18181f;
+  --color-bg-hover:     #1e1e28;
+  --color-bg-active:    #252530;
+
+  /* Foreground ramp */
+  --color-text:         #f0f0f5;
+  --color-text-secondary: #a0a0b0;
+  --color-text-muted:   #606070;
+
+  /* Accent gradient */
+  --color-accent:       #8b5cf6;
+  --color-accent-hover: #a78bfa;
+  --color-accent-subtle:rgba(139, 92, 246, 0.12);
+
+  /* Semantic */
+  --color-success:      #22c55e;
+  --color-warning:      #f59e0b;
+  --color-error:        #ef4444;
+
+  /* Glass */
+  --glass-bg:           rgba(17, 17, 24, 0.78);
+  --glass-border:       rgba(255, 255, 255, 0.06);
+  --glass-blur:         20px;
+
+  /* Radii */
+  --radius-sm:          6px;
+  --radius-md:          10px;
+  --radius-lg:          16px;
+  --radius-xl:          24px;
+  --radius-full:        9999px;
+
+  /* Spacing scale (4px base) */
+  --space-0:   0;    --space-1: 4px;  --space-2: 8px;
+  --space-3:  12px;  --space-4: 16px; --space-5: 20px;
+  --space-6:  24px;  --space-8: 32px; --space-10: 40px;
+  --space-12: 48px;  --space-16: 64px;
+
+  /* Typography */
+  --font-sans:  'Inter', system-ui, -apple-system, sans-serif;
+  --font-display: 'DM Sans', 'Inter', system-ui, sans-serif;
+
+  /* Sidebar */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 72px;
+
+  /* Player bar */
+  --player-height: 80px;
+
+  /* Transitions */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+}
+
+/* ─── Theme utilities ────────────────────────────────────────── */
+@theme inline {
+  --color-muse-bg:            var(--color-bg);
+  --color-muse-bg-elevated:  var(--color-bg-elevated);
+  --color-muse-bg-surface:   var(--color-bg-surface);
+  --color-muse-bg-hover:     var(--color-bg-hover);
+  --color-muse-bg-active:    var(--color-bg-active);
+  --color-muse-text:         var(--color-text);
+  --color-muse-text-secondary: var(--color-text-secondary);
+  --color-muse-text-muted:   var(--color-text-muted);
+  --color-muse-accent:       var(--color-accent);
+  --color-muse-accent-hover: var(--color-accent-hover);
+  --color-muse-accent-subtle: var(--color-accent-subtle);
+  --color-muse-success:      var(--color-success);
+  --color-muse-warning:      var(--color-warning);
+  --color-muse-error:        var(--color-error);
+  --color-muse-glass:        var(--glass-bg);
+  --color-muse-glass-border: var(--glass-border);
+  --font-family-sans:        var(--font-sans);
+  --font-family-display:     var(--font-display);
+}
+
+/* ─── Global Base ─────────────────────────────────────────────── */
+html {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  overflow: hidden;
+  height: 100dvh;
+}
+
+#root {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Scrollbar styling ───────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+/* ─── Selection ──────────────────────────────────────────────── */
+::selection {
+  background: var(--color-accent-subtle);
+  color: var(--color-text);
+}
+
+/* ─── Focus visible ──────────────────────────────────────────── */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ─── Glass utility ──────────────────────────────────────────── */
+.glass {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+}
+
+/* ─── Gradient text utility ───────────────────────────────────── */
+.gradient-text {
+  background: linear-gradient(135deg, #8b5cf6, #6366f1, #3b82f6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Skeleton shimmer ────────────────────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--color-bg-surface) 25%,
+    var(--color-bg-hover) 50%,
+    var(--color-bg-surface) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: var(--radius-sm);
+}

@@ -1,7 +1,0 @@
-[package]
-name = "muse-core"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-muse-shared = { path = "../shared" }

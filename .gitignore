@@ -1,1 +1,31 @@
+# dependencies
+node_modules/
+
+# build output
+dist/
+
+# typescript build cache
+*.tsbuildinfo
+
+# legacy Rust build artifacts (from the earlier Tauri/Rust workspace)
 target/
+
+# logs
+*.log
+npm-debug.log*
+
+# editor / OS
+.DS_Store
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# vite cache
+.vite/
+
+# vitest
+coverage/
+
+# env
+.env
+.env.*
