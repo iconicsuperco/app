@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button'
 import { clearLibraryData, exportLibraryData } from '@/library/libraryData'
 import { useSettingsStore } from '@/store/settingsStore'
 import { useUIStore } from '@/store/uiStore'
+import { EqualizerPanel } from '@/features/equalizer/EqualizerPanel'
 
 const THEMES = [
   { value: 'dark', label: 'Dark' },
@@ -16,15 +17,14 @@ const ACCENT_COLORS = ['#8b5cf6', '#3b82f6', '#14b8a6', '#f43f5e', '#f59e0b']
 
 export function SettingsPage() {
   const [clearDialogOpen, setClearDialogOpen] = useState(false)
+  const [equalizerOpen, setEqualizerOpen] = useState(false)
   const [isClearing, setIsClearing] = useState(false)
   const crossfadeEnabled = useSettingsStore((s) => s.crossfadeEnabled)
   const gaplessEnabled = useSettingsStore((s) => s.gaplessEnabled)
-  const eqEnabled = useSettingsStore((s) => s.eqEnabled)
   const accentColor = useSettingsStore((s) => s.accentColor)
   const themePreset = useSettingsStore((s) => s.themePreset)
   const setCrossfadeEnabled = useSettingsStore((s) => s.setCrossfadeEnabled)
   const setGaplessEnabled = useSettingsStore((s) => s.setGaplessEnabled)
-  const setEqEnabled = useSettingsStore((s) => s.setEqEnabled)
   const setAccentColor = useSettingsStore((s) => s.setAccentColor)
   const setThemePreset = useSettingsStore((s) => s.setThemePreset)
   const addToast = useUIStore((s) => s.addToast)
@@ -72,7 +72,7 @@ export function SettingsPage() {
             <Toggle checked={gaplessEnabled} onCheckedChange={setGaplessEnabled} label="Gapless Playback" />
           </SettingRow>
           <SettingRow label="Equalizer" description="Customize audio frequencies">
-            <Toggle checked={eqEnabled} onCheckedChange={setEqEnabled} label="Equalizer" />
+            <Button variant="secondary" size="sm" onClick={() => setEqualizerOpen(true)}>Open equalizer</Button>
           </SettingRow>
         </SettingSection>
         <SettingSection title="Appearance">
@@ -136,6 +136,7 @@ export function SettingsPage() {
         onOpenChange={setClearDialogOpen}
         onConfirm={() => void handleConfirmClear()}
       />
+      <EqualizerPanel open={equalizerOpen} onOpenChange={setEqualizerOpen} />
     </div>
   )
 }
