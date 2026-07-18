@@ -1,6 +1,8 @@
 import { cn, formatDuration } from '@/lib/utils'
 import { usePlayerStore } from '@/player/PlayerStore'
-import { useQueueStore } from '@/player/QueueStore'
+import { playerController } from '@/audio/PlayerController'
+import { useCurrentTrack } from '@/hooks/useCurrentTrack'
+import { useArtwork } from '@/hooks/useArtwork'
 import { Button } from '@/components/ui/Button'
 import { Slider } from '@/components/ui/Slider'
 import {
@@ -20,6 +22,7 @@ import {
 } from 'lucide-react'
 import { Tooltip } from '@/components/ui/Tooltip'
 import { useUIStore } from '@/store/uiStore'
+import { toggleFavorite } from '@/library/queries'
 
 export function MiniPlayer() {
   const {
@@ -30,41 +33,46 @@ export function MiniPlayer() {
     muted,
     repeatMode,
     shuffle,
-    togglePlayPause,
     setPosition,
     setVolume,
     toggleMute,
     cycleRepeatMode,
     toggleShuffle,
   } = usePlayerStore()
-  const next = useQueueStore((s) => s.next)
-  const previous = useQueueStore((s) => s.previous)
-  const { setNowPlayingOpen, toggleQueue } = useUIStore()
-  const isPlaying = status === 'playing'
-  const hasTrack = usePlayerStore((s) => s.currentTrackId) !== null
 
-  // Placeholder track info for now (will be replaced by real data)
-  const trackTitle = 'No track playing'
-  const trackArtist = '—'
+  const track = useCurrentTrack()
+  const artworkUrl = useArtwork(track?.artworkId)
+  const { setNowPlayingOpen, toggleQueue } = useUIStore()
+
+  const isPlaying = status === 'playing'
+  const hasTrack = track != null
 
   const VolumeIcon = muted || volume === 0 ? VolumeX : volume < 0.5 ? Volume1 : Volume2
-
   const RepeatIcon = repeatMode === 'one' ? Repeat1 : Repeat
+
+  const handleSeek = (value: number[]) => {
+    setPosition(value[0] ?? 0)
+    playerController.seek(value[0] ?? 0)
+  }
+
+  const handleFavorite = () => {
+    if (track) void toggleFavorite(track.id)
+  }
 
   return (
     <div
       className={cn(
-        'glass border-t border-muse-glass-border shrink-0 z-30',
+        'glass border-t border-muse-glass-border shrink-0 z-30 relative',
         'transition-all duration-300',
-        !hasTrack && 'opacity-0 translate-y-2 pointer-events-none',
+        !hasTrack && 'opacity-60',
       )}
       style={{ height: 'var(--player-height)' }}
     >
-      {/* Progress bar at top of player */}
+      {/* Progress bar (absolute, top edge) */}
       <div className="absolute top-0 left-0 right-0 h-1 group cursor-pointer">
         <Slider
           value={[position]}
-          onValueChange={([v]) => setPosition(v ?? 0)}
+          onValueChange={handleSeek}
           min={0}
           max={duration || 100}
           step={0.1}
@@ -76,17 +84,35 @@ export function MiniPlayer() {
         {/* Left: track info */}
         <div className="flex items-center gap-3 w-[280px] min-w-0 shrink-0">
           <div className="w-12 h-12 rounded-md bg-muse-bg-surface shrink-0 overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-blue-600/30" />
+            {artworkUrl ? (
+              <img src={artworkUrl} alt="" className="w-full h-full object-cover" />
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-600/30 to-blue-600/30" />
+            )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-muse-text truncate">{trackTitle}</p>
-            <p className="text-xs text-muse-text-muted truncate">{trackArtist}</p>
+            <p className="text-sm font-medium text-muse-text truncate">
+              {track?.title ?? 'No track playing'}
+            </p>
+            <p className="text-xs text-muse-text-muted truncate">
+              {track?.artist ?? '—'}
+            </p>
           </div>
-          <Tooltip content="Add to favorites">
-            <Button variant="ghost" size="icon-sm" className="text-muse-text-muted hover:text-muse-accent shrink-0">
-              <Heart className="w-4 h-4" />
-            </Button>
-          </Tooltip>
+          {track && (
+            <Tooltip content={track.isFavorite ? 'Remove from favorites' : 'Add to favorites'}>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={handleFavorite}
+                className={cn(
+                  'text-muse-text-muted hover:text-muse-accent shrink-0',
+                  track.isFavorite && 'text-muse-accent',
+                )}
+              >
+                <Heart className={cn('w-4 h-4', track.isFavorite && 'fill-current')} />
+              </Button>
+            </Tooltip>
+          )}
         </div>
 
         {/* Center: transport controls */}
@@ -110,7 +136,7 @@ export function MiniPlayer() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={previous}
+                onClick={() => playerController.previous()}
                 disabled={!hasTrack}
                 className="text-muse-text hover:text-muse-text"
               >
@@ -122,7 +148,7 @@ export function MiniPlayer() {
               <Button
                 variant="primary"
                 size="icon-lg"
-                onClick={togglePlayPause}
+                onClick={() => playerController.togglePlayPause()}
                 disabled={!hasTrack}
                 className="rounded-full"
               >
@@ -138,7 +164,7 @@ export function MiniPlayer() {
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={next}
+                onClick={() => playerController.next()}
                 disabled={!hasTrack}
                 className="text-muse-text hover:text-muse-text"
               >
@@ -195,7 +221,7 @@ export function MiniPlayer() {
             </Tooltip>
             <Slider
               value={[muted ? 0 : volume]}
-              onValueChange={([v]) => setVolume(v ?? 0)}
+              onValueChange={(v) => setVolume(v[0] ?? 0)}
               min={0}
               max={1}
               step={0.01}
