@@ -3,6 +3,8 @@
 export interface Track {
   id: string
   blobId: string
+  artistId: string
+  albumId?: string
   artworkId?: string
   title: string
   artist: string

@@ -1,5 +1,6 @@
 import Dexie, { type Table } from 'dexie'
 import type { Track, Album, Artist, Playlist, PlayHistoryEntry } from '@/types'
+import { makeAlbumId, makeArtistId } from './ids'
 
 export class MuseDB extends Dexie {
   tracks!: Table<Track, string>
@@ -22,6 +23,25 @@ export class MuseDB extends Dexie {
       audioBlobs: 'id',
       artworkBlobs: 'id',
     })
+
+    this.version(2)
+      .stores({
+        tracks: 'id, artistId, albumId, artist, album, albumArtist, genre, year, isFavorite, dateAdded, lastPlayed, duration',
+        albums: 'id, title, albumArtist, year',
+        artists: 'id, name',
+        playlists: 'id, name, createdAt',
+        playHistory: 'id, trackId, playedAt',
+        audioBlobs: 'id',
+        artworkBlobs: 'id',
+      })
+      .upgrade(async (tx) => {
+        await tx.table('tracks').toCollection().modify((track: Track) => {
+          track.artistId = makeArtistId(track.artist)
+          track.albumId = track.album
+            ? makeAlbumId(track.album, track.albumArtist ?? track.artist)
+            : undefined
+        })
+      })
   }
 }
 

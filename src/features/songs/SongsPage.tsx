@@ -131,7 +131,7 @@ function TrackRow({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              navigate(`/artist/${encodeURIComponent(track.artist)}`)
+              navigate(`/artist/${encodeURIComponent(track.artistId)}`)
             }}
             className="text-xs text-muse-text-muted hover:text-muse-text hover:underline truncate block text-left"
           >
@@ -144,7 +144,7 @@ function TrackRow({
       <button
         onClick={(e) => {
           e.stopPropagation()
-          if (track.album) navigate(`/album/${encodeURIComponent(track.album)}`)
+          if (track.albumId) navigate(`/album/${encodeURIComponent(track.albumId)}`)
         }}
         className="text-sm text-muse-text-muted hover:text-muse-text hover:underline truncate text-left"
       >

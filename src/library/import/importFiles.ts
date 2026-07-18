@@ -3,6 +3,7 @@ import { extractMetadata } from './extractMetadata'
 import { guessFromFilename } from './guessFromFilename'
 import { extractPalette } from './extractPalette'
 import type { Track, Album, Artist, ColorPalette, ImportProgress } from '@/types'
+import { makeAlbumId, makeArtistId } from '@/library/ids'
 
 const SUPPORTED_EXTS = [
   '.mp3', '.m4a', '.aac', '.flac', '.ogg', '.opus', '.wav', '.wma', '.webm',
@@ -110,9 +111,13 @@ async function importSingleFile(file: File): Promise<void> {
 
   // 6. Persist Track record
   const trackId = crypto.randomUUID()
+  const artistId = makeArtistId(artist)
+  const albumId = makeAlbumId(album, albumArtist)
   const track: Track = {
     id: trackId,
     blobId: fileId,
+    artistId,
+    albumId,
     artworkId,
     title,
     artist,
@@ -141,9 +146,8 @@ async function importSingleFile(file: File): Promise<void> {
 
 /** Create or update the Album grouping for a track. */
 async function upsertAlbum(track: Track): Promise<void> {
-  if (!track.album) return
-  const albumId = makeAlbumId(track.album, track.albumArtist ?? track.artist)
-  const existing = await db.albums.get(albumId)
+  if (!track.album || !track.albumId) return
+  const existing = await db.albums.get(track.albumId)
   if (existing) {
     if (!existing.trackIds.includes(track.id)) {
       existing.trackIds.push(track.id)
@@ -157,7 +161,7 @@ async function upsertAlbum(track: Track): Promise<void> {
     await db.albums.put(existing)
   } else {
     const album: Album = {
-      id: albumId,
+      id: track.albumId,
       title: track.album,
       albumArtist: track.albumArtist ?? track.artist,
       year: track.year,
@@ -171,9 +175,8 @@ async function upsertAlbum(track: Track): Promise<void> {
 
 /** Create or update the Artist entry for a track. */
 async function upsertArtist(track: Track): Promise<void> {
-  const artistId = makeArtistId(track.artist)
-  const existing = await db.artists.get(artistId)
-  const albumId = track.album ? makeAlbumId(track.album, track.albumArtist ?? track.artist) : null
+  const existing = await db.artists.get(track.artistId)
+  const albumId = track.albumId ?? null
 
   if (existing) {
     if (albumId && !existing.albumIds.includes(albumId)) {
@@ -183,7 +186,7 @@ async function upsertArtist(track: Track): Promise<void> {
     await db.artists.put(existing)
   } else {
     const artist: Artist = {
-      id: artistId,
+      id: track.artistId,
       name: track.artist,
       albumIds: albumId ? [albumId] : [],
       trackCount: 1,
@@ -192,21 +195,11 @@ async function upsertArtist(track: Track): Promise<void> {
   }
 }
 
-// ─── ID helpers ────────────────────────────────────────────────
-
 /** Stable content-based id from file size + name + last modified. */
 async function makeFileId(file: File): Promise<string> {
   // Use file metadata rather than hashing the whole blob — fast + good enough for dedup
   const seed = `${file.name}:${file.size}:${file.lastModified}`
   return slug(seed)
-}
-
-function makeAlbumId(title: string, artist: string): string {
-  return slug(`album:${title}:${artist}`)
-}
-
-function makeArtistId(name: string): string {
-  return slug(`artist:${name}`)
 }
 
 /** Convert a string to a stable URL-safe slug. */

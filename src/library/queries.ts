@@ -64,9 +64,7 @@ export const artistByIdQuery = (id: string) =>
     if (!artist) return null
     const albums = await db.albums.where('id').anyOf(artist.albumIds).toArray()
 
-    // Track.album stores album title (not album id), so join via album titles.
-    const albumTitles = Array.from(new Set(albums.map((a) => a.title)))
-    const tracks = await db.tracks.where('album').anyOf(albumTitles).toArray()
+    const tracks = await db.tracks.where('artistId').equals(id).toArray()
 
     tracks.sort((a, b) => (b.playCount ?? 0) - (a.playCount ?? 0))
     return { artist, albums, tracks }
