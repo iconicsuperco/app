@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  Captions,
   Eye,
   EyeOff,
   Heart,
@@ -28,8 +29,12 @@ import { usePlayerStore } from '@/player/PlayerStore'
 import { useUIStore } from '@/store/uiStore'
 import { useSettingsStore } from '@/store/settingsStore'
 import { Visualizer } from '@/features/visualizer/Visualizer'
+import { LyricsView } from '@/features/lyrics/LyricsView'
+import { db } from '@/library/db'
+import { useState } from 'react'
 
 export function NowPlayingView() {
+  const [lyricsOpen, setLyricsOpen] = useState(false)
   const track = useCurrentTrack()
   const artworkUrl = useArtwork(track?.artworkId)
   const navigate = useNavigate()
@@ -78,6 +83,9 @@ export function NowPlayingView() {
     setNowPlayingOpen(false)
     navigate(path)
   }
+  const importLyrics = async (file: File) => {
+    if (track) await db.tracks.update(track.id, { lyrics: await file.text() })
+  }
 
   return (
     <div
@@ -102,6 +110,14 @@ export function NowPlayingView() {
       )}
       <div className="relative mx-auto flex min-h-0 w-full max-w-5xl flex-1 flex-col">
         <div className="flex shrink-0 justify-end">
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={lyricsOpen ? 'Hide lyrics' : 'Show lyrics'}
+            onClick={() => setLyricsOpen(!lyricsOpen)}
+          >
+            <Captions className="h-5 w-5" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -201,6 +217,14 @@ export function NowPlayingView() {
                 <span>{formatDuration(duration)}</span>
               </div>
             </div>
+            {lyricsOpen && (
+              <LyricsView
+                track={track}
+                position={position}
+                onSeek={(time) => handleSeek([time])}
+                onImport={(file) => void importLyrics(file)}
+              />
+            )}
 
             <div className="flex items-center justify-center gap-2 sm:gap-4">
               <Button
